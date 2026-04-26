@@ -1,0 +1,27 @@
+{
+  "name": "node_server_api",
+  "version": "1.0.0",
+  "description": "Invoice extraction API using Gemini",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "@google/genai": "^1.48.0",
+    "@google/generative-ai": "^0.24.1",
+    "canvas": "^3.2.3",
+    "chrome-lens-ocr": "^4.1.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "mime": "^4.1.0",
+    "multer": "^2.1.1",
+    "mysql2": "^3.22.2",
+    "pdf-parse": "^2.4.5",
+    "pdf-to-img": "^5.0.0",
+    "pdfjs-dist": "^5.6.205",
+    "tesseract.js": "^7.0.0"
+  }
+}
