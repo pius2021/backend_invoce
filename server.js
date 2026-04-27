@@ -154,15 +154,12 @@ function parseTable(text) {
     const lines = text.split("\n").map(line => line.trim()).filter(Boolean);
 
     const data = [];
-    let station = "";
 
     for (const line of lines) {
         const nums = line.match(/\d+/g) || [];
 
-        if (!nums.length) {
-            station = normalizeStationName(line);
-            continue;
-        }
+        const stationMatch = line.match(/^[^\d]+/);
+        const station = stationMatch ? normalizeStationName(stationMatch[0]) : "";
 
         if (nums.length >= 9 && station) {
             data.push({
@@ -177,8 +174,6 @@ function parseTable(text) {
                 water_cooler: +nums[7],
                 lighting: +nums[8],
             });
-
-            station = "";
         }
     }
 
