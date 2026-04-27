@@ -151,29 +151,47 @@ function normalizeStationName(rawStation) {
 }
 
 function parseTable(text) {
-    const lines = text.split("\n").map(line => line.trim()).filter(Boolean);
+    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
 
     const data = [];
+    let currentStation = null;
+    let bufferNumbers = [];
 
     for (const line of lines) {
         const nums = line.match(/\d+/g) || [];
 
-        const stationMatch = line.match(/^[^\d]+/);
-        const station = stationMatch ? normalizeStationName(stationMatch[0]) : "";
+        // If line has text (station name)
+        const hasText = /[a-zA-Z]/.test(line);
 
-        if (nums.length >= 9 && station) {
+        if (hasText && nums.length < 5) {
+            // New station
+            currentStation = normalizeStationName(line);
+            bufferNumbers = [];
+            continue;
+        }
+
+        // Collect numbers (can be split across lines)
+        if (nums.length) {
+            bufferNumbers.push(...nums.map(Number));
+        }
+
+        // If we collected enough values → push row
+        if (currentStation && bufferNumbers.length >= 9) {
             data.push({
-                station,
-                electric_fan: +nums[0],
-                sewing_machine: +nums[1],
-                ewp: +nums[2],
-                small_appliances: +nums[3],
-                water_heater: +nums[4],
-                room_cooler_small: +nums[5],
-                room_cooler_big: +nums[6],
-                water_cooler: +nums[7],
-                lighting: +nums[8],
+                station: currentStation,
+                electric_fan: bufferNumbers[0],
+                sewing_machine: bufferNumbers[1],
+                ewp: bufferNumbers[2],
+                small_appliances: bufferNumbers[3],
+                water_heater: bufferNumbers[4],
+                room_cooler_small: bufferNumbers[5],
+                room_cooler_big: bufferNumbers[6],
+                water_cooler: bufferNumbers[7],
+                lighting: bufferNumbers[8],
             });
+
+            currentStation = null;
+            bufferNumbers = [];
         }
     }
 
