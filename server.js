@@ -150,54 +150,6 @@ function normalizeStationName(rawStation) {
         .trim();
 }
 
-function parseTable(text) {
-    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-
-    const data = [];
-    let currentStation = null;
-    let bufferNumbers = [];
-
-    for (const line of lines) {
-        const nums = line.match(/\d+/g) || [];
-
-        // If line has text (station name)
-        const hasText = /[a-zA-Z]/.test(line);
-
-        if (hasText && nums.length < 5) {
-            // New station
-            currentStation = normalizeStationName(line);
-            bufferNumbers = [];
-            continue;
-        }
-
-        // Collect numbers (can be split across lines)
-        if (nums.length) {
-            bufferNumbers.push(...nums.map(Number));
-        }
-
-        // If we collected enough values → push row
-        if (currentStation && bufferNumbers.length >= 9) {
-            data.push({
-                station: currentStation,
-                electric_fan: bufferNumbers[0],
-                sewing_machine: bufferNumbers[1],
-                ewp: bufferNumbers[2],
-                small_appliances: bufferNumbers[3],
-                water_heater: bufferNumbers[4],
-                room_cooler_small: bufferNumbers[5],
-                room_cooler_big: bufferNumbers[6],
-                water_cooler: bufferNumbers[7],
-                lighting: bufferNumbers[8],
-            });
-
-            currentStation = null;
-            bufferNumbers = [];
-        }
-    }
-
-    return data;
-}
-
 // Validation
 function normalizeFreightRateRow(row = {}) {
     return {
@@ -310,6 +262,51 @@ app.post("/upload/confirm", async(req, res) => {
         res.status(500).json({ error: "Failed to save data" });
     }
 });
+
+function parseTable(text) {
+    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+
+    const data = [];
+    let currentStation = null;
+    let bufferNumbers = [];
+
+    for (const line of lines) {
+        const nums = line.match(/\d+/g) || [];
+
+        const stationMatch = line.match(/^[^\d]+/);
+        const stationName = stationMatch ? normalizeStationName(stationMatch[0]) : "";
+
+        // detect station even if numbers are in same line
+        if (stationName) {
+            currentStation = stationName;
+            bufferNumbers = [];
+        }
+
+        if (nums.length) {
+            bufferNumbers.push(...nums.map(Number));
+        }
+
+        if (currentStation && bufferNumbers.length >= 9) {
+            data.push({
+                station: currentStation,
+                electric_fan: bufferNumbers[0],
+                sewing_machine: bufferNumbers[1],
+                ewp: bufferNumbers[2],
+                small_appliances: bufferNumbers[3],
+                water_heater: bufferNumbers[4],
+                room_cooler_small: bufferNumbers[5],
+                room_cooler_big: bufferNumbers[6],
+                water_cooler: bufferNumbers[7],
+                lighting: bufferNumbers[8],
+            });
+
+            currentStation = null;
+            bufferNumbers = [];
+        }
+    }
+
+    return data;
+}
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
