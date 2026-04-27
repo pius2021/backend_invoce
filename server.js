@@ -23,15 +23,18 @@ app.use(express.json());
 
 // MySQL connection
 const dbConfig = {
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "freight_db"
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: 3306
 };
 
 // Ensure uploads directory exists
-const UPLOAD_DIR = "uploads/";
-if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR);
+const UPLOAD_DIR = "/tmp/uploads/";
+if (!fs.existsSync(UPLOAD_DIR)) {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
 
